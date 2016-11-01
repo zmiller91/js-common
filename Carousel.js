@@ -7,9 +7,9 @@
  */
 Carousel = function() 
 {
-    this.objectList = {};
-    this.keyList = [];
-    this.current = null;
+    this._objectMap = {};
+    this._keyList = [];
+    this._currentKey = null;
 };
 
 /**
@@ -21,27 +21,49 @@ Carousel = function()
  */
 Carousel.prototype.add = function(key, value) 
 {
-    this.objectList[key] = value;
-    this.keyList.push(key);
-    return this.objectList[key];
+    this._objectMap[key] = value;
+    this._keyList.push(key);
+    if(this._keyList.length === 1)
+    {
+        this._currentKey = key;
+    }
+    
+    return this._objectMap[key];
 };
 
 /**
- * Delete an object from the carousel
+ * Delete the current object from the carousel
+ * 
+ * @returns {object}
+ */
+Carousel.prototype.delete = function()
+{
+    var key = this._currentKey;
+    return this.deleteKey(key);
+}
+
+/**
+ * Delete an object with the specified key from the carousel
  * 
  * @param {string} key
  * @returns {object} deleted
  */
-Carousel.prototype.delete = function(key) 
+Carousel.prototype.deleteKey = function(key) 
 {
     var removed = null;
-    for(var i = 0; i < this.keyList.length; i++)
+    for(var i = 0; i < this._keyList.length; i++)
     {
-        if(this.keyList[i] === key) 
+        if(this._keyList[i] === key) 
         {
-            removed = this.objectList[key];
-            this.keyList.splice(i, 1);
-            delete this.objectList[key];
+            removed = this._objectMap[key];
+            this._keyList.splice(i, 1);
+            delete this._objectMap[key];
+            if(key === this._currentKey)
+            {
+                this._currentKey = this._keyList.length > 0 ?
+                    this._keyList[0] :
+                    null;
+            }
         }
     }
     
@@ -53,16 +75,16 @@ Carousel.prototype.delete = function(key)
  * 
  * @returns {object} head
  */
-Carousel.prototype.forward = function() 
+Carousel.prototype.next = function() 
 {
     var obj = null;
     var key = null;
-    
-    if(this.keyList.length > 0) 
+    if(this._keyList.length > 0) 
     {
-        key = this.keyList.shift();
-        this.keyList.push(key);
-        obj = this.objectList[this.keyList[0]];
+        key = this._keyList.shift();
+        this._keyList.push(key);
+        obj = this._objectMap[this._keyList[0]];
+        this._currentKey = this._keyList[0];
     }
     
     return obj;
@@ -73,17 +95,27 @@ Carousel.prototype.forward = function()
  * 
  * @returns {object} head
  */
-Carousel.prototype.backward = function() 
+Carousel.prototype.previous = function() 
 {
     var obj = null;
     var key = null;
-    
-    if(this.keyList.length > 0) 
+    if(this._keyList.length > 0) 
     {
-        key = this.keyList.pop();
-        this.keyList.unshift(key);
-        obj = this.objectList[this.keyList[0]];
+        key = this._keyList.pop();
+        this._keyList.unshift(key);
+        obj = this._objectMap[this._keyList[0]];
+        this._currentKey = this._keyList[0];
     }
     
-    return null;
+    return obj;
+};
+
+/**
+ * Returns the _currentKey head of the carousel.
+ * 
+ * @returns {object}
+ */
+Carousel.prototype.current = function()
+{
+    return this._objectMap[this._currentKey];
 };
