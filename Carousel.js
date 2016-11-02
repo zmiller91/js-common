@@ -21,11 +21,14 @@ Carousel = function()
  */
 Carousel.prototype.add = function(key, value) 
 {
-    this._objectMap[key] = value;
-    this._keyList.push(key);
-    if(this._keyList.length === 1)
+    if(!(key in this._objectMap))
     {
-        this._currentKey = key;
+        this._objectMap[key] = value;
+        this._keyList.push(key);
+        if(this._keyList.length === 1)
+        {
+            this._currentKey = key;
+        }
     }
     
     return this._objectMap[key];
@@ -111,11 +114,43 @@ Carousel.prototype.previous = function()
 };
 
 /**
- * Returns the _currentKey head of the carousel.
+ * Returns the head of the carousel.
  * 
  * @returns {object}
  */
 Carousel.prototype.current = function()
 {
     return this._objectMap[this._currentKey];
+};
+
+/**
+ * Returns the key of the current head.
+ * 
+ * @returns {string}
+ */
+Carousel.prototype.currentKey = function()
+{
+    return this._currentKey;
+};
+
+/**
+ * Peeks ahead to the next key. If there is no next key, then the current key
+ * is returned
+ * 
+ * @returns {string}
+ */
+Carousel.prototype.peek = function(key)
+{
+    return this._keyList.length > 1 ? this._keyList[1] : this._currentKey;
+};
+
+/**
+ * Returns the key of the previous head
+ * 
+ * @returns {string}
+ */
+Carousel.prototype.last = function(key)
+{
+    return this._keyList.length > 0 ? 
+        this._keyList[this._keyList.length - 1] : this._currentKey;
 };
