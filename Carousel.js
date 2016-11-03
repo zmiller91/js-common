@@ -1,7 +1,10 @@
 /**
  * Create a carousel instance. A carousel is a data object that stores objects
- * and allows a user to move foward and backward. Objects can be added and 
- * removed from a carousel. 
+ * and allows a user to move foward and backward. The implementation of a 
+ * Carousel is a circular queue of keys and a corresponding hashmap of
+ * values. The head of the queue is a key that points to the current object
+ * in the hashmap. The use of a circular queue and a hashmap allows for 
+ * quick existence checks and updates.
  * 
  * @returns Carousel
  */
@@ -13,7 +16,8 @@ Carousel = function()
 };
 
 /**
- * Add an object to the carousel
+ * Add an object to the carousel. If a key already exists in the carousel,
+ * then the key will be overwritten with the new value.
  * 
  * @param {string} key
  * @param {object} value
@@ -21,9 +25,10 @@ Carousel = function()
  */
 Carousel.prototype.add = function(key, value) 
 {
-    if(!(key in this._objectMap))
+    var exists = key in this._objectMap;
+    this._objectMap[key] = value;
+    if(!exists)
     {
-        this._objectMap[key] = value;
         this._keyList.push(key);
         if(this._keyList.length === 1)
         {
@@ -39,11 +44,11 @@ Carousel.prototype.add = function(key, value)
  * 
  * @returns {object}
  */
-Carousel.prototype.delete = function()
+Carousel.prototype.deleteCurrent = function()
 {
     var key = this._currentKey;
     return this.deleteKey(key);
-}
+};
 
 /**
  * Delete an object with the specified key from the carousel
@@ -134,23 +139,32 @@ Carousel.prototype.currentKey = function()
 };
 
 /**
- * Peeks ahead to the next key. If there is no next key, then the current key
- * is returned
+ * Move the head of the carousel to the object with the specified key
  * 
- * @returns {string}
+ * @param {string} key
+ * @returns {object}
  */
-Carousel.prototype.peek = function(key)
+Carousel.prototype.seekTo = function(key)
 {
-    return this._keyList.length > 1 ? this._keyList[1] : this._currentKey;
+    // If the key's index is in the first half of the carousel, then the 
+    // quickest way to seek to the key is to move right
+    var idx = this._keyList.indexOf(key);
+    var moveRight = idx < (this._keyList.length / 2);
+    while(idx !== -1 && this._currentKey !== key)
+    {
+        moveRight ? this.next() : this.previous();
+    }
+    
+    return this.current();
 };
 
 /**
- * Returns the key of the previous head
+ * Checks if the provided key exists in the carousel
  * 
- * @returns {string}
+ * @param {string} key
+ * @returns {boolean}
  */
-Carousel.prototype.last = function(key)
+Carousel.prototype.contains = function(key)
 {
-    return this._keyList.length > 0 ? 
-        this._keyList[this._keyList.length - 1] : this._currentKey;
+    return key in this._objectMap;
 };
