@@ -168,3 +168,40 @@ Carousel.prototype.contains = function(key)
 {
     return key in this._objectMap;
 };
+
+/**
+ * Returns the keys of the next or previous objects, as specified by amount. 
+ * If amount is negave the "previous" elements will be returned, otherwise
+ * the "next" elements will be returned.
+ * 
+ * @param {int} amount
+ * @returns {array}
+ */
+Carousel.prototype.preview = function(amount)
+{
+    if(Math.abs(amount) < this._keyList.length)
+    {
+        return amount >= 0 ? 
+            this._keyList.slice(0, amount) : 
+            this._keyList.slice(this._keyList.length + amount, this._keyList.length);
+    }
+    
+    return this._keyList;
+}
+
+/**
+ * Returns the object specified by the key. If the key does not exist, then
+ * null is returned.
+ * 
+ * @param {string} key
+ * @returns {object}
+ */
+Carousel.prototype.get = function(key)
+{
+    if(!this.contains(key))
+    {
+        return null;
+    }
+    
+    return this._objectMap[key];
+}
