@@ -3,7 +3,7 @@ define([], function() {
         init: function(app) {
             app.controller('UserCtrl', function($scope, $uibModal, User) {
 
-                $scope.user = {};
+                $scope.user = User.get();
 
                 $scope.register = function () {
                     $uibModal.open({
@@ -189,12 +189,24 @@ define([], function() {
 
             app.service('User', ['$rootScope', '$http', function($rootScope, $http) {
 
+                var $this = this;
                 this.response;
                 this.data;
                 this.loggedIn = false;
                 this.id;
                 this.name;
                 this.errors;
+                this.authorizationFinished = false;
+                
+                this.get = function()
+                {
+                    return {
+                      loggedIn: this.loggedIn,
+                      id: this.id,
+                      name: this.name, 
+                      errors: this.errors
+                    };
+                }
                 
                 this.login = function(creds, success, error) {
                     var data = {user: creds, method: 'login'};
@@ -231,16 +243,21 @@ define([], function() {
 
                 this.authorizeCookie = function() {
                     $http.post('/api/authorize')
-                    .then(parseResponse, function() {});
+                    .then(function(response) {
+                        parseResponse(response);
+                        $this.authorizationFinished = true;
+                    }, function() {
+                        $this.authorizationFinished = true;
+                    });
                 };
                 
                 function parseResponse(response) {
-                    this.data = response.data;
-                    this.id = this.data.id;
-                    this.name = this.data.name;
-                    this.loggedIn = this.data.loggedIn;
-                    this.errors = this.data.errors;
-                    $rootScope.$broadcast('user:updated',this.data);
+                    $this.data = response.data;
+                    $this.id = $this.data.id;
+                    $this.name = $this.data.name;
+                    $this.loggedIn = $this.data.loggedIn;
+                    $this.errors = $this.data.errors;
+                    $rootScope.$broadcast('user:updated',$this.data);
                 }
             }]);
         }

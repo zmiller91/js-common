@@ -40,6 +40,18 @@ Carousel.prototype.add = function(key, value)
 };
 
 /**
+ * Resets the Carousel to it's empty state. 
+ * 
+ * @returns {undefined}
+ */
+Carousel.prototype.reset = function()
+{
+    this._objectMap = {};
+    this._keyList = [];
+    this._currentKey = null;
+}
+
+/**
  * Delete the current object from the carousel
  * 
  * @returns {object}
