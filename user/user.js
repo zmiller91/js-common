@@ -214,6 +214,11 @@ define([], function() {
                     .then(function(response) {
                         parseResponse(response);
                         success(response.data);
+                        if(response.data.loggedIn)
+                        {
+                            $rootScope.$broadcast('user:loggedin',$this.data);
+                        }
+                        
                     }, function(response) {
                         error(response);
                     });
@@ -235,13 +240,25 @@ define([], function() {
                     $http.post('/api/register', oData)
                         .then(function(response) {
                             parseResponse(response);
-                            success(response.data);
+                            if(success)
+                            {
+                                success(response.data);
+                            }
                         }, function(response) {
-                            error(response);
+                            if(error)
+                            {
+                                error(response);
+                            }
                     });
                 }
 
                 this.authorizeCookie = function() {
+                    
+                    if($this.authorizationFinished)
+                    {
+                        return;
+                    }
+                    
                     $http.post('/api/authorize')
                     .then(function(response) {
                         parseResponse(response);
