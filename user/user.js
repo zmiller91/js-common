@@ -229,6 +229,7 @@ define([], function() {
                     $http.post('/api/logout', oData)
                         .then(function(response) {
                             parseResponse(response);
+                            $rootScope.$broadcast('user:loggedout',$this.data);
                             success(response.data);
                         }, function(response) {
                             error(response);
