@@ -216,4 +216,14 @@ Carousel.prototype.get = function(key)
     }
     
     return this._objectMap[key];
-}
+};
+
+/**
+ * Return the objects keys
+ * 
+ * @returns {array}
+ */
+Carousel.prototype.keys = function()
+{
+    return this._keyList;
+};
