@@ -227,3 +227,12 @@ Carousel.prototype.keys = function()
 {
     return this._keyList;
 };
+
+/**
+ * Returns the size of the carousel
+ * 
+ * @returns {integer}
+ */
+Carousel.prototype.count = function() {
+    return this._keyList.length;
+}
