@@ -6,16 +6,18 @@ define([], function() {
                 $scope.user = User.get();
 
                 $scope.register = function () {
+                    console.log("opening");
                     $uibModal.open({
-                        templateUrl: 'lib/js-common/user/register_modal.html',
+                        templateUrl: 'js/lib/js-common/user/register_modal.html',
                         controller: 'RegistrationCtrl',
                         size: 'sm'
                     });
                 };    
 
                 $scope.login = function () {
+                    console.log("opening");
                     $uibModal.open({
-                        templateUrl: 'lib/js-common/user/login_modal.html',
+                        templateUrl: 'js/lib/js-common/user/login_modal.html',
                         controller: 'LoginCtrl',
                         size: 'sm'
                     });
