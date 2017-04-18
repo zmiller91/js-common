@@ -41,70 +41,15 @@ define([], function() {
 
             app.controller('LoginCtrl', function ($scope, $uibModalInstance, User) {
                 
-                $scope.user = {errors: []};
-                $scope.creds = {name: "", pass: ""};
-                $scope.loading = false;
-                
-                $scope.submit = function(){
-                    $scope.user.errors = [];
-                    var hasError = false;
-                    
-                    // Username is required
-                    if(!$scope.creds.name || $scope.creds.name.length === 0) {
-                        $scope.user.errors.push("Username is required.");
-                        hasError = true;
-                    }
-                    
-                    // Password is required
-                    if(!$scope.creds.pass || $scope.creds.pass.length === 0) {
-                        $scope.user.errors.push("Password is required.");
-                        hasError = true;
-                    }
-                    
-                    if(!hasError) {
-                        $scope.loading = true;
-                        User.login(
-                            $scope.creds, 
-                            function(user) {
-                                if(user.loggedIn) {
-                                    $uibModalInstance.close(user);
-                                }
-                                
-                                $scope.loading = false;
-                            }, 
-                            function(response) 
-                            {
-                                var errors = response["data"]["errors"];
-                                if(errors)
-                                {
-                                    $scope.user.errors = errors;
-                                }
-                                else
-                                {
-                                    $scope.user.errors = ["Unknown error."];
-                                }
-                                
-                                $scope.loading = false;
-                            }
-                        );
-                    }
+                var close = function(user) {
+                    $uibModalInstance.close(user);
                 };
-
+                
+                var factory = new LoginFactory($scope, close);
+                $scope = factory.$scope;
                 $scope.cancel = function () {
                     $uibModalInstance.dismiss('cancel');
                 };
-                
-                $scope.keypress = function(keyEvent)
-                {
-                    if (keyEvent.which === 13)
-                    {
-                        $scope.submit();
-                    }
-                };
-
-                $scope.$on('user:updated', function(event,data) {
-                    $scope.user = data;
-                });
             });
 
             app.controller('RegistrationCtrl', function ($scope, $uibModalInstance, User) {
@@ -188,6 +133,75 @@ define([], function() {
                     $scope.user = angular.extend($scope.user, data);
                 });
             });
+            
+            app.factory('LoginFactory', ['User', function(User) {
+                    
+                return function($s, successCallback) {
+                    var $scope = $s;
+                    $scope.user = {errors: []};
+                    $scope.creds = {name: "", pass: ""};
+                    $scope.loading = false;
+
+                    $scope.submit = function(){
+                        $scope.user.errors = [];
+                        var hasError = false;
+
+                        // Username is required
+                        if(!$scope.creds.name || $scope.creds.name.length === 0) {
+                            $scope.user.errors.push("Username is required.");
+                            hasError = true;
+                        }
+
+                        // Password is required
+                        if(!$scope.creds.pass || $scope.creds.pass.length === 0) {
+                            $scope.user.errors.push("Password is required.");
+                            hasError = true;
+                        }
+
+                        if(!hasError) {
+                            $scope.loading = true;
+                            User.login(
+                                $scope.creds, 
+                                function(user) {
+                                    if(user.loggedIn) {
+                                        if(successCallback) {
+                                            successCallback(user);
+                                        }
+                                    }
+
+                                    $scope.loading = false;
+                                }, 
+                                function(response) 
+                                {
+                                    var errors = response["data"]["errors"];
+                                    if(errors)
+                                    {
+                                        $scope.user.errors = errors;
+                                    }
+                                    else
+                                    {
+                                        $scope.user.errors = ["Unknown error."];
+                                    }
+
+                                    $scope.loading = false;
+                                }
+                            );
+                        }
+                    };
+
+                    $scope.keypress = function(keyEvent)
+                    {
+                        if (keyEvent.which === 13)
+                        {
+                            $scope.submit();
+                        }
+                    };
+
+                    $scope.$on('user:updated', function(event,data) {
+                        $scope.user = data;
+                    });
+                };
+            }]);
 
             app.service('User', ['$rootScope', '$http', function($rootScope, $http) {
 
