@@ -39,7 +39,7 @@ define([], function() {
                 });
             });
 
-            app.controller('LoginCtrl', function ($scope, $uibModalInstance, User) {
+            app.controller('LoginCtrl', function ($scope, LoginFactory, $uibModalInstance) {
                 
                 var close = function(user) {
                     $uibModalInstance.close(user);
@@ -52,87 +52,101 @@ define([], function() {
                 };
             });
 
-            app.controller('RegistrationCtrl', function ($scope, $uibModalInstance, User) {
-
-                $scope.user = {name: "", pass: "", verified_pass: "", errors: []};
-                $scope.loading = false;
+            app.controller('RegistrationCtrl', function ($scope, RegistrationFactory, $uibModalInstance) {
                 
-                $scope.submit = function () {
-                    $scope.user.errors = [];
-                    var hasError = false;
-                    
-                    // Username is required
-                    if(!$scope.user.name || $scope.user.name.length === 0) {
-                        $scope.user.errors.push("Username is required.");
-                        hasError = true;
-                    }
-                    
-                    // Password is required
-                    if(!$scope.user.pass || $scope.user.pass.length === 0) {
-                        $scope.user.errors.push("Password is required.");
-                        hasError = true;
-                    }
-                    
-                    // Verification password is required
-                    if(!$scope.user.verified_pass || $scope.user.verified_pass.length === 0) {
-                        $scope.user.errors.push("Verification password is required.");
-                        hasError = true;
-                    }
-                    
-                    // Passwords must match
-                    if ($scope.user.pass !== $scope.user.verified_pass) {
-                        $scope.user.errors.push("Password missmatch.");
-                        hasError = true;
-                    }
-                    
-                    if (!hasError) {
-                        $scope.loading = true;
-                        User.register(
-                            $scope.user, 
-                            function(user) 
-                            {
-                                if(user.loggedIn) {
-                                    $scope.user = {};
-                                    $uibModalInstance.close(user);
-                                }
-                                
-                                $scope.loading = false;
-                            }, 
-                            function(response) 
-                            {
-                                var errors = response["data"]["errors"];
-                                if(errors)
-                                {
-                                    $scope.user.errors = errors;
-                                }
-                                else
-                                {
-                                    
-                                $scope.user.errors = ["Unknown error."];
-                                }
-                                
-                                $scope.loading = false;
-                            }
-                        );
-                    } 
+                var close = function(user) {
+                    $uibModalInstance.close(user);
                 };
-
+                
+                var factory = new RegistrationFactory($scope, close);
+                $scope = factory.$scope;
                 $scope.cancel = function () {
                     $uibModalInstance.dismiss('cancel');
                 };
-                
-                $scope.keypress = function(keyEvent)
-                {
-                    if (keyEvent.which === 13)
-                    {
-                        $scope.submit();
-                    }
-                };
-
-                $scope.$on('user:updated', function(event, data) {
-                    $scope.user = angular.extend($scope.user, data);
-                });
             });
+            
+            app.factory('RegistrationFactory', ['User', function(User) {
+                    return function($s, successCallback) {
+                        
+                        var $scope = $s;
+                        $scope.user = {name: "", pass: "", verified_pass: "", errors: []};
+                        $scope.loading = false;
+
+                        $scope.submit = function () {
+                            $scope.user.errors = [];
+                            var hasError = false;
+
+                            // Username is required
+                            if(!$scope.user.name || $scope.user.name.length === 0) {
+                                $scope.user.errors.push("Username is required.");
+                                hasError = true;
+                            }
+
+                            // Password is required
+                            if(!$scope.user.pass || $scope.user.pass.length === 0) {
+                                $scope.user.errors.push("Password is required.");
+                                hasError = true;
+                            }
+
+                            // Verification password is required
+                            if(!$scope.user.verified_pass || $scope.user.verified_pass.length === 0) {
+                                $scope.user.errors.push("Verification password is required.");
+                                hasError = true;
+                            }
+
+                            // Passwords must match
+                            if ($scope.user.pass !== $scope.user.verified_pass) {
+                                $scope.user.errors.push("Password missmatch.");
+                                hasError = true;
+                            }
+
+                            if (!hasError) {
+                                $scope.loading = true;
+                                User.register(
+                                    $scope.user, 
+                                    function(user) 
+                                    {
+                                        if(user.loggedIn) {
+                                            $scope.user = {};
+                                            if(successCallback) {
+                                                successCallback(user);
+                                            }
+                                        }
+
+                                        $scope.loading = false;
+                                    }, 
+                                    function(response) 
+                                    {
+                                        var errors = response["data"]["errors"];
+                                        if(errors)
+                                        {
+                                            $scope.user.errors = errors;
+                                        }
+                                        else
+                                        {
+
+                                        $scope.user.errors = ["Unknown error."];
+                                        }
+
+                                        $scope.loading = false;
+                                    }
+                                );
+                            } 
+                        };
+
+                        $scope.keypress = function(keyEvent)
+                        {
+                            if (keyEvent.which === 13)
+                            {
+                                $scope.submit();
+                            }
+                        };
+
+                        $scope.$on('user:updated', function(event, data) {
+                            $scope.user = angular.extend($scope.user, data);
+                        });
+                    };
+            }]);
             
             app.factory('LoginFactory', ['User', function(User) {
                     
