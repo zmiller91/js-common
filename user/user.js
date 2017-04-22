@@ -294,6 +294,7 @@ define([], function() {
                     .then(function(response) {
                         parseResponse(response);
                         $this.authorizationFinished = true;
+                        $rootScope.$broadcast('user:authorized',$this.data);
                     }, function() {
                         $this.authorizationFinished = true;
                     });
