@@ -260,9 +260,9 @@ define([], function() {
                         .then(function(response) {
                             parseResponse(response);
                             $rootScope.$broadcast('user:loggedout',$this.data);
-                            success(response.data);
+                            success && success(response.data);
                         }, function(response) {
-                            error(response);
+                            error && error(response);
                     });
                 }
                 
