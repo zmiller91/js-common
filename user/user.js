@@ -283,7 +283,7 @@ define([], function() {
                     });
                 }
 
-                this.authorizeCookie = function() {
+                this.authorizeCookie = function(success, error) {
                     
                     if($this.authorizationFinished)
                     {
@@ -295,8 +295,10 @@ define([], function() {
                         parseResponse(response);
                         $this.authorizationFinished = true;
                         $rootScope.$broadcast('user:authorized',$this.data);
+                        success && success($this.data);
                     }, function() {
                         $this.authorizationFinished = true;
+                        error && error($this.data);
                     });
                 };
                 
